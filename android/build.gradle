@@ -50,6 +50,12 @@ android {
     dependencies {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
+        implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
+        implementation 'com.sunmi:printerlibrary:1.0.23'
+    }
+
+    buildFeatures {
+        aidl true
     }
 
     testOptions {
