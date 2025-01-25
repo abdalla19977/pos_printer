@@ -1,0 +1,1 @@
+flutter pub run pigeon --input pigeons/pos_printer_plugin.dart
