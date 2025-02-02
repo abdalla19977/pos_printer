@@ -48,8 +48,8 @@ class FlutterError (
 
 enum class Alignments(val raw: Int) {
   LEFT(0),
-  RIGHT(1),
-  CENTER(2);
+  CENTER(1),
+  RIGHT(2);
 
   companion object {
     fun ofRaw(raw: Int): Alignments? {
@@ -70,10 +70,11 @@ enum class PrinterSize(val raw: Int) {
 }
 
 enum class PrinterStatus(val raw: Int) {
-  OUT_OF_PAPER(0),
-  OVER_HEATING(1),
-  COVER_OPEN(2),
-  GENERAL_ERROR(3);
+  NORMAL(0),
+  OUT_OF_PAPER(1),
+  OVER_HEATING(2),
+  COVER_OPEN(3),
+  GENERAL_ERROR(4);
 
   companion object {
     fun ofRaw(raw: Int): PrinterStatus? {
@@ -82,24 +83,16 @@ enum class PrinterStatus(val raw: Int) {
   }
 }
 
-/** Generated class from Pigeon that represents data sent in messages. */
-data class SecondaryScreenSize (
-  val width: Long,
-  val hight: Long
-)
- {
+enum class DeviceManufacture(val raw: Int) {
+  SUNMI(0),
+  SENRAISE(1),
+  TELPO(2),
+  UNKNOWN(3);
+
   companion object {
-    fun fromList(pigeonVar_list: List<Any?>): SecondaryScreenSize {
-      val width = pigeonVar_list[0] as Long
-      val hight = pigeonVar_list[1] as Long
-      return SecondaryScreenSize(width, hight)
+    fun ofRaw(raw: Int): DeviceManufacture? {
+      return values().firstOrNull { it.raw == raw }
     }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      width,
-      hight,
-    )
   }
 }
 private open class PosPrinterPigeonCodec : StandardMessageCodec() {
@@ -121,8 +114,8 @@ private open class PosPrinterPigeonCodec : StandardMessageCodec() {
         }
       }
       132.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          SecondaryScreenSize.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          DeviceManufacture.ofRaw(it.toInt())
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -142,9 +135,9 @@ private open class PosPrinterPigeonCodec : StandardMessageCodec() {
         stream.write(131)
         writeValue(stream, value.raw)
       }
-      is SecondaryScreenSize -> {
+      is DeviceManufacture -> {
         stream.write(132)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw)
       }
       else -> super.writeValue(stream, value)
     }
@@ -153,13 +146,6 @@ private open class PosPrinterPigeonCodec : StandardMessageCodec() {
 
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface PosPrinter {
-  /**
-   * initialize the printer
-   * [grayLevel] works only with telpo value between 1 and 5
-   *
-   * Returns `0` in case of success and `1` in case of failure
-   */
-  fun init(grayLevel: Long): Long
   /**
    * start printing
    * used in case of printers only working with commit mode
@@ -179,7 +165,7 @@ interface PosPrinter {
    * [texts] text table to be printed
    * [width] determine the width of text
    * [align] determine the alignment of text in the row
-   * []
+   * [fontSize] fontSize of the printed text
    */
   fun printTable(texts: List<String>, width: List<Long>, align: List<Long>, fontSize: Long)
   /** Print an image */
@@ -197,29 +183,6 @@ interface PosPrinter {
   fun sendTextToLcdDigital(text: String)
   /** Send Image to display on LCD */
   fun sendImageLcdDigital(bitmap: ByteArray)
-  /**
-   * print a barcode
-   * [symbology] between 0 and 8 works with sunmi and senraise
-   * 0 → UPC-A
-   * 1 → UPC-E
-   * 2 → JAN13 (EAN13)
-   * 3 → JAN8 (EAN8)
-   * 4 → CODE39
-   * 5 → ITF
-   * 6 → CODABAR
-   * 7 → CODE 93
-   * 8 → CODE128
-   * [height] between 1 – 255 default 162
-   * [width] between 2 – 6 default 2
-   */
-  fun printBarcode(data: String, symbology: Long, width: Long, height: Long)
-  /** print a printQrCode */
-  fun printQrCode(data: String)
-  /**
-   * return the size of the secondary display
-   * width and height in pixels
-   */
-  fun getSecondaryScreenSize(): SecondaryScreenSize
   /** open cash drawer for supported device */
   fun openDrawer()
   /**cut the paper after printing */
@@ -230,10 +193,11 @@ interface PosPrinter {
   fun getPrinterStatus(): PrinterStatus
   /**release printer after quitting app */
   fun deInitPrinter()
-  fun isTelpo(): Boolean
-  fun isSunmi(): Boolean
-  fun isSenraise(): Boolean
-  fun isPos(): Boolean
+  /**
+   * return pos manufacture sunmi,senraise,telpo and
+   * unknown in case of unsupported brand
+   */
+  fun getDeviceManufacture(): DeviceManufacture
   /**
    * release printer after printing complete
    * works with telpo and pos that support commit mode
@@ -249,23 +213,6 @@ interface PosPrinter {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: PosPrinter?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.init$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val grayLevelArg = args[0] as Long
-            val wrapped: List<Any?> = try {
-              listOf(api.init(grayLevelArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.start$separatedMessageChannelSuffix", codec)
         if (api != null) {
@@ -430,60 +377,6 @@ interface PosPrinter {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.printBarcode$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val dataArg = args[0] as String
-            val symbologyArg = args[1] as Long
-            val widthArg = args[2] as Long
-            val heightArg = args[3] as Long
-            val wrapped: List<Any?> = try {
-              api.printBarcode(dataArg, symbologyArg, widthArg, heightArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.printQrCode$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val dataArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              api.printQrCode(dataArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.getSecondaryScreenSize$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.getSecondaryScreenSize())
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.openDrawer$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
@@ -565,56 +458,11 @@ interface PosPrinter {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.isTelpo$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.getDeviceManufacture$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
-              listOf(api.isTelpo())
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.isSunmi$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.isSunmi())
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.isSenraise$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.isSenraise())
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.pos_printer.PosPrinter.isPos$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.isPos())
+              listOf(api.getDeviceManufacture())
             } catch (exception: Throwable) {
               wrapError(exception)
             }

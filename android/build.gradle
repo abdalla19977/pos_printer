@@ -25,7 +25,7 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    namespace = "com.cashier.pos_printer.pos_printer"
+    namespace = "com.cashier.pos_printer"
 
     compileSdk = 35
 
@@ -44,14 +44,15 @@ android {
     }
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     dependencies {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
-        implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
         implementation 'com.sunmi:printerlibrary:1.0.23'
+        implementation 'com.github.abdalla19977:TelpoLib:1.4'
+
     }
 
     buildFeatures {
@@ -70,3 +71,14 @@ android {
         }
     }
 }
+
+//dependencies {
+////    implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
+////    implementation files("libs/telpoLib_v2.14.20231218.aar")
+//
+//    testImplementation("org.jetbrains.kotlin:kotlin-test")
+//    testImplementation("org.mockito:mockito-core:5.0.0")
+//    implementation 'com.sunmi:printerlibrary:1.0.23'
+//    implementation 'com.github.abdalla19977:TelpoLib:1.4'
+//
+//}

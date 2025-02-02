@@ -17,8 +17,8 @@ PlatformException _createConnectionError(String channelName) {
 
 enum Alignments {
   left,
-  right,
   center,
+  right,
 }
 
 enum PrinterSize {
@@ -27,36 +27,18 @@ enum PrinterSize {
 }
 
 enum PrinterStatus {
+  normal,
   outOfPaper,
   overHeating,
   coverOpen,
   generalError,
 }
 
-class SecondaryScreenSize {
-  SecondaryScreenSize({
-    required this.width,
-    required this.hight,
-  });
-
-  int width;
-
-  int hight;
-
-  Object encode() {
-    return <Object?>[
-      width,
-      hight,
-    ];
-  }
-
-  static SecondaryScreenSize decode(Object result) {
-    result as List<Object?>;
-    return SecondaryScreenSize(
-      width: result[0]! as int,
-      hight: result[1]! as int,
-    );
-  }
+enum DeviceManufacture {
+  sunmi,
+  senraise,
+  telpo,
+  unknown,
 }
 
 
@@ -76,9 +58,9 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is PrinterStatus) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    }    else if (value is SecondaryScreenSize) {
+    }    else if (value is DeviceManufacture) {
       buffer.putUint8(132);
-      writeValue(buffer, value.encode());
+      writeValue(buffer, value.index);
     } else {
       super.writeValue(buffer, value);
     }
@@ -97,7 +79,8 @@ class _PigeonCodec extends StandardMessageCodec {
         final int? value = readValue(buffer) as int?;
         return value == null ? null : PrinterStatus.values[value];
       case 132: 
-        return SecondaryScreenSize.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : DeviceManufacture.values[value];
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -116,37 +99,6 @@ class PosPrinter {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
-
-  /// initialize the printer
-  /// [grayLevel] works only with telpo value between 1 and 5
-  ///
-  /// Returns `0` in case of success and `1` in case of failure
-  Future<int> init(int grayLevel) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.init$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[grayLevel]) as List<Object?>?;
-    if (pigeonVar_replyList == null) {
-      throw _createConnectionError(pigeonVar_channelName);
-    } else if (pigeonVar_replyList.length > 1) {
-      throw PlatformException(
-        code: pigeonVar_replyList[0]! as String,
-        message: pigeonVar_replyList[1] as String?,
-        details: pigeonVar_replyList[2],
-      );
-    } else if (pigeonVar_replyList[0] == null) {
-      throw PlatformException(
-        code: 'null-error',
-        message: 'Host platform returned null value for non-null return value.',
-      );
-    } else {
-      return (pigeonVar_replyList[0] as int?)!;
-    }
-  }
 
   /// start printing
   /// used in case of printers only working with commit mode
@@ -204,7 +156,7 @@ class PosPrinter {
   /// [texts] text table to be printed
   /// [width] determine the width of text
   /// [align] determine the alignment of text in the row
-  /// []
+  /// [fontSize] fontSize of the printed text
   Future<void> printTable(List<String> texts, List<int> width, List<int> align, int fontSize) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.printTable$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -371,93 +323,6 @@ class PosPrinter {
     }
   }
 
-  /// print a barcode
-  /// [symbology] between 0 and 8 works with sunmi and senraise
-  /// 0 → UPC-A
-  /// 1 → UPC-E
-  /// 2 → JAN13 (EAN13)
-  /// 3 → JAN8 (EAN8)
-  /// 4 → CODE39
-  /// 5 → ITF
-  /// 6 → CODABAR
-  /// 7 → CODE 93
-  /// 8 → CODE128
-  /// [height] between 1 – 255 default 162
-  /// [width] between 2 – 6 default 2
-  Future<void> printBarcode(String data, int symbology, int width, int height) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.printBarcode$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[data, symbology, width, height]) as List<Object?>?;
-    if (pigeonVar_replyList == null) {
-      throw _createConnectionError(pigeonVar_channelName);
-    } else if (pigeonVar_replyList.length > 1) {
-      throw PlatformException(
-        code: pigeonVar_replyList[0]! as String,
-        message: pigeonVar_replyList[1] as String?,
-        details: pigeonVar_replyList[2],
-      );
-    } else {
-      return;
-    }
-  }
-
-  /// print a printQrCode
-  Future<void> printQrCode(String data) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.printQrCode$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[data]) as List<Object?>?;
-    if (pigeonVar_replyList == null) {
-      throw _createConnectionError(pigeonVar_channelName);
-    } else if (pigeonVar_replyList.length > 1) {
-      throw PlatformException(
-        code: pigeonVar_replyList[0]! as String,
-        message: pigeonVar_replyList[1] as String?,
-        details: pigeonVar_replyList[2],
-      );
-    } else {
-      return;
-    }
-  }
-
-  /// return the size of the secondary display
-  /// width and height in pixels
-  Future<SecondaryScreenSize> getSecondaryScreenSize() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.getSecondaryScreenSize$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(null) as List<Object?>?;
-    if (pigeonVar_replyList == null) {
-      throw _createConnectionError(pigeonVar_channelName);
-    } else if (pigeonVar_replyList.length > 1) {
-      throw PlatformException(
-        code: pigeonVar_replyList[0]! as String,
-        message: pigeonVar_replyList[1] as String?,
-        details: pigeonVar_replyList[2],
-      );
-    } else if (pigeonVar_replyList[0] == null) {
-      throw PlatformException(
-        code: 'null-error',
-        message: 'Host platform returned null value for non-null return value.',
-      );
-    } else {
-      return (pigeonVar_replyList[0] as SecondaryScreenSize?)!;
-    }
-  }
-
   /// open cash drawer for supported device
   Future<void> openDrawer() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.openDrawer$pigeonVar_messageChannelSuffix';
@@ -578,8 +443,10 @@ class PosPrinter {
     }
   }
 
-  Future<bool> isTelpo() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.isTelpo$pigeonVar_messageChannelSuffix';
+  /// return pos manufacture sunmi,senraise,telpo and
+  /// unknown in case of unsupported brand
+  Future<DeviceManufacture> getDeviceManufacture() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.getDeviceManufacture$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -601,88 +468,7 @@ class PosPrinter {
         message: 'Host platform returned null value for non-null return value.',
       );
     } else {
-      return (pigeonVar_replyList[0] as bool?)!;
-    }
-  }
-
-  Future<bool> isSunmi() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.isSunmi$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(null) as List<Object?>?;
-    if (pigeonVar_replyList == null) {
-      throw _createConnectionError(pigeonVar_channelName);
-    } else if (pigeonVar_replyList.length > 1) {
-      throw PlatformException(
-        code: pigeonVar_replyList[0]! as String,
-        message: pigeonVar_replyList[1] as String?,
-        details: pigeonVar_replyList[2],
-      );
-    } else if (pigeonVar_replyList[0] == null) {
-      throw PlatformException(
-        code: 'null-error',
-        message: 'Host platform returned null value for non-null return value.',
-      );
-    } else {
-      return (pigeonVar_replyList[0] as bool?)!;
-    }
-  }
-
-  Future<bool> isSenraise() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.isSenraise$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(null) as List<Object?>?;
-    if (pigeonVar_replyList == null) {
-      throw _createConnectionError(pigeonVar_channelName);
-    } else if (pigeonVar_replyList.length > 1) {
-      throw PlatformException(
-        code: pigeonVar_replyList[0]! as String,
-        message: pigeonVar_replyList[1] as String?,
-        details: pigeonVar_replyList[2],
-      );
-    } else if (pigeonVar_replyList[0] == null) {
-      throw PlatformException(
-        code: 'null-error',
-        message: 'Host platform returned null value for non-null return value.',
-      );
-    } else {
-      return (pigeonVar_replyList[0] as bool?)!;
-    }
-  }
-
-  Future<bool> isPos() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.isPos$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(null) as List<Object?>?;
-    if (pigeonVar_replyList == null) {
-      throw _createConnectionError(pigeonVar_channelName);
-    } else if (pigeonVar_replyList.length > 1) {
-      throw PlatformException(
-        code: pigeonVar_replyList[0]! as String,
-        message: pigeonVar_replyList[1] as String?,
-        details: pigeonVar_replyList[2],
-      );
-    } else if (pigeonVar_replyList[0] == null) {
-      throw PlatformException(
-        code: 'null-error',
-        message: 'Host platform returned null value for non-null return value.',
-      );
-    } else {
-      return (pigeonVar_replyList[0] as bool?)!;
+      return (pigeonVar_replyList[0] as DeviceManufacture?)!;
     }
   }
 

@@ -1,5 +1,13 @@
 package com.cashier.pos_printer
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import com.cashier.pos_printer.printing.Printer
+import com.cashier.pos_printer.printing.senraise.SenraisePrinterHelper
+import com.cashier.pos_printer.printing.sunmi.SunmiPrintHelper
+import com.cashier.pos_printer.printing.telpo.TelpoPrintHelper
+import com.cashier.pos_printer.utils.DeviceFeaturesUtils
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -7,6 +15,8 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 /** PosPrinterPlugin */
 class PosPrinterPlugin : FlutterPlugin, PosPrinter, ActivityAware {
 
+    private lateinit var printer: Printer
+    private lateinit var context: Context
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         PosPrinter.setUp(flutterPluginBinding.binaryMessenger, this)
@@ -18,116 +28,121 @@ class PosPrinterPlugin : FlutterPlugin, PosPrinter, ActivityAware {
 
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        //init here
+        init(binding.activity)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        //de init here
+        if (::context.isInitialized)
+            printer.deInitPrinter(context)
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        //init here
+        init(binding.activity)
     }
 
     override fun onDetachedFromActivity() {
-        //de init here
+        if (::context.isInitialized)
+            printer.deInitPrinter(context)
     }
 
-    override fun init(grayLevel: Long): Long {
-        TODO("Not yet implemented")
+    private fun init(context: Context) {
+        printer = when {
+            DeviceFeaturesUtils.isSenraise() -> SenraisePrinterHelper()
+            DeviceFeaturesUtils.isSunmi() -> SunmiPrintHelper()
+            DeviceFeaturesUtils.isTelpo() -> TelpoPrintHelper()
+            else -> SunmiPrintHelper()
+        }
+        printer.init(context)
     }
 
     override fun start() {
-        TODO("Not yet implemented")
+        printer.start()
     }
 
     override fun printText(text: String, textSize: Double, isBold: Boolean, isItalic: Boolean) {
-        TODO("Not yet implemented")
+        printer.printText(
+            text = text,
+            textSize = textSize.toFloat(),
+            isBold = isBold,
+            isItalic = isItalic
+        )
     }
 
     override fun printTable(
         texts: List<String>,
         width: List<Long>,
         align: List<Long>,
-        fontSize: Long
+        fontSize: Long,
     ) {
-        TODO("Not yet implemented")
+        printer.printTable(
+            texts.toTypedArray(),
+            width.map { it.toInt() }.toIntArray(),
+            align.map { it.toInt() }.toIntArray(),
+            fontSize.toInt(),
+        )
     }
 
     override fun printBitmap(bitmap: ByteArray) {
-        TODO("Not yet implemented")
+        val decodedBitmap: Bitmap = BitmapFactory.decodeByteArray(bitmap, 0, bitmap.size)
+        printer.printBitmap(decodedBitmap)
     }
 
     override fun feedPaper(lines: Long) {
-        TODO("Not yet implemented")
+        printer.feedPaper(lines.toInt())
     }
 
     override fun setAlign(align: Alignments) {
-        TODO("Not yet implemented")
+        printer.setAlign(align.raw)
     }
 
     override fun getPrinterSize(): PrinterSize {
-        TODO("Not yet implemented")
+        return when (printer.getPrinterSize()) {
+            com.cashier.pos_printer.printing.numnum.PrinterSize.SIZE_58 -> PrinterSize.SIZE_58MM
+            com.cashier.pos_printer.printing.numnum.PrinterSize.SIZE_80 -> PrinterSize.SIZE_80MM
+        }
     }
 
     override fun sendTextToLcdDigital(text: String) {
-        TODO("Not yet implemented")
+        printer.sendTextToLcdDigital(text)
     }
 
     override fun sendImageLcdDigital(bitmap: ByteArray) {
-        TODO("Not yet implemented")
-    }
-
-    override fun printBarcode(data: String, symbology: Long, width: Long, height: Long) {
-        TODO("Not yet implemented")
-    }
-
-    override fun printQrCode(data: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getSecondaryScreenSize(): SecondaryScreenSize {
-        TODO("Not yet implemented")
+        val decodedBitmap: Bitmap = BitmapFactory.decodeByteArray(bitmap, 0, bitmap.size)
+        printer.sendImageToLcdDigital(decodedBitmap)
     }
 
     override fun openDrawer() {
-        TODO("Not yet implemented")
+        printer.openDrawer()
     }
 
     override fun cutPaper() {
-        TODO("Not yet implemented")
+        printer.cutPaper()
     }
 
     override fun escPosCommandExe(commands: ByteArray) {
-        TODO("Not yet implemented")
+        printer.escPosCommandExe(commands)
     }
 
     override fun getPrinterStatus(): PrinterStatus {
-        TODO("Not yet implemented")
+        return printer.getStatus()
     }
 
     override fun deInitPrinter() {
-        TODO("Not yet implemented")
+        if (::context.isInitialized)
+            printer.deInitPrinter(context)
     }
 
-    override fun isTelpo(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun isSunmi(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun isSenraise(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun isPos(): Boolean {
-        TODO("Not yet implemented")
+    override fun getDeviceManufacture(): DeviceManufacture {
+        return when {
+            DeviceFeaturesUtils.isSenraise() -> DeviceManufacture.SENRAISE
+            DeviceFeaturesUtils.isSunmi() -> DeviceManufacture.SUNMI
+            DeviceFeaturesUtils.isTelpo() -> DeviceManufacture.TELPO
+            else -> DeviceManufacture.UNKNOWN
+        }
     }
 
     override fun release() {
-        TODO("Not yet implemented")
+        printer.release()
     }
 
 }

@@ -8,29 +8,16 @@ import 'package:pigeon/pigeon.dart';
   kotlinOut: 'android/src/main/kotlin/com/cashier/pos_printer/PosPrinter.kt',
   dartPackageName: 'pos_printer',
 ))
-enum Alignments { left, right, center }
+enum Alignments { left, center, right }
 
 enum PrinterSize { size_58mm, size_80mm }
 
-enum PrinterStatus { outOfPaper, overHeating, coverOpen, generalError }
+enum PrinterStatus { normal, outOfPaper, overHeating, coverOpen, generalError }
 
-class SecondaryScreenSize {
-  final int width;
-  final int hight;
-  SecondaryScreenSize({
-    required this.width,
-    required this.hight,
-  });
-}
+enum DeviceManufacture { sunmi, senraise, telpo, unknown }
 
 @HostApi()
 abstract class PosPrinter {
-  /// initialize the printer
-  /// [grayLevel] works only with telpo value between 1 and 5
-  ///
-  /// Returns `0` in case of success and `1` in case of failure
-  int init(int grayLevel);
-
   /// start printing
   /// used in case of printers only working with commit mode
   /// like telpo printers
@@ -47,7 +34,7 @@ abstract class PosPrinter {
   /// [texts] text table to be printed
   /// [width] determine the width of text
   /// [align] determine the alignment of text in the row
-  /// []
+  /// [fontSize] fontSize of the printed text
   void printTable(
       List<String> texts, List<int> width, List<int> align, int fontSize);
 
@@ -70,28 +57,6 @@ abstract class PosPrinter {
   /// Send Image to display on LCD
   void sendImageLcdDigital(Uint8List bitmap);
 
-  /// print a barcode
-  /// [symbology] between 0 and 8 works with sunmi and senraise
-  /// 0 → UPC-A
-  /// 1 → UPC-E
-  /// 2 → JAN13 (EAN13)
-  /// 3 → JAN8 (EAN8)
-  /// 4 → CODE39
-  /// 5 → ITF
-  /// 6 → CODABAR
-  /// 7 → CODE 93
-  /// 8 → CODE128
-  /// [height] between 1 – 255 default 162
-  /// [width] between 2 – 6 default 2
-  void printBarcode(String data, int symbology, int width, int height);
-
-  /// print a printQrCode
-  void printQrCode(String data);
-
-  ///return the size of the secondary display
-  ///width and height in pixels
-  SecondaryScreenSize getSecondaryScreenSize();
-
   /// open cash drawer for supported device
   void openDrawer();
 
@@ -107,13 +72,9 @@ abstract class PosPrinter {
   ///release printer after quitting app
   void deInitPrinter();
 
-  bool isTelpo();
-  
-  bool isSunmi();
-
-  bool isSenraise();
-
-  bool isPos();
+  ///return pos manufacture sunmi,senraise,telpo and
+  ///unknown in case of unsupported brand
+  DeviceManufacture getDeviceManufacture();
 
   /// release printer after printing complete
   /// works with telpo and pos that support commit mode

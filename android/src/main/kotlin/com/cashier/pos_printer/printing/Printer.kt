@@ -1,8 +1,9 @@
-package com.appy.cashier.common.printing
+package com.cashier.pos_printer.printing
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.appy.cashier.common.printing.sunmi.SunmiPrintHelper
+import com.cashier.pos_printer.PrinterStatus
+import com.cashier.pos_printer.printing.numnum.PrinterSize
 
 /**
  * @Author: abdalla atheer
@@ -10,11 +11,6 @@ import com.appy.cashier.common.printing.sunmi.SunmiPrintHelper
  * @Date: 8/9/2022
  */
 interface Printer {
-
-    companion object{
-        const val SIZE_58 = "58"
-        const val SIZE_80 = "80"
-    }
 
     var leftAlignment: Int
     var centerAlignment: Int
@@ -36,16 +32,17 @@ interface Printer {
     /**
      * print text
      * @param isBold to set text to bold
+     * @param isItalic to set text to italic mode
      * @param textSize 27f is preferred
      */
-    fun printText(text: String, textSize: Float, isBold: Boolean)
+    fun printText(text: String, textSize: Float, isBold: Boolean, isItalic: Boolean)
 
     /**
      * Print a row of a table
      * @param width determine the width of text
      * @param align determine the alignment of text in the row
      */
-    fun printTable(texts: Array<String>, width: IntArray?, align: IntArray?)
+    fun printTable(texts: Array<String>, width: IntArray?, align: IntArray?, fontSize: Int)
 
     /**
      * Print an image
@@ -66,12 +63,27 @@ interface Printer {
     /**
      * Get printer head size 58mm or 80mm
      */
-    fun getPrinterSize(): String
+    fun getPrinterSize(): PrinterSize
+
+    /**
+     * Cut paper
+     */
+    fun cutPaper()
 
     /**
      * Send Number to display on LCD
      */
-    fun sendLcdDigital(text:String)
+    fun sendTextToLcdDigital(text: String)
+
+    /**
+     * Send Image to display on LCD
+     */
+    fun sendImageToLcdDigital(bitmap: Bitmap)
+
+    /**
+     * send list of esc/pos command
+     */
+    fun escPosCommandExe(byteArray: ByteArray)
 
     /**
      * open cash drawer
@@ -79,7 +91,17 @@ interface Printer {
     fun openDrawer()
 
     /**
+     * get printer head status like paper out or over heating
+     */
+    fun getStatus(): PrinterStatus
+
+    /**
      * release printer and screen
      */
     fun release()
+
+    /**
+     * de init printer when app closes
+     */
+    fun deInitPrinter(context: Context?)
 }

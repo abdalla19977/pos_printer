@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.cashier.pos_printer.pos_printer_example"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

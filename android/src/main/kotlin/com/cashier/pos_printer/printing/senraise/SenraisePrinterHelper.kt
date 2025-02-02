@@ -2,8 +2,9 @@ package com.cashier.pos_printer.printing.senraise
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.appy.cashier.common.printing.Printer
-import com.appy.cashier.common.printing.Printer.Companion.SIZE_58
+import com.cashier.pos_printer.PrinterStatus
+import com.cashier.pos_printer.printing.Printer
+import com.cashier.pos_printer.printing.numnum.PrinterSize
 import com.cashier.pos_printer.printing.senraise.service.SenraisePrinterCallback
 import com.cashier.pos_printer.printing.senraise.service.SenraisePrinterException
 import com.cashier.pos_printer.printing.senraise.service.SenraisePrinterManager
@@ -19,9 +20,6 @@ class SenraisePrinterHelper : Printer {
 
     /**
      * senraise means checking the printer connection status
-     */
-
-    /**
      * PrinterInterface for API
      */
     private var senraisePrinterService: PrinterInterface? = null
@@ -56,13 +54,18 @@ class SenraisePrinterHelper : Printer {
 
     }
 
-    override fun printText(text: String, textSize: Float, isBold: Boolean) {
+    override fun printText(text: String, textSize: Float, isBold: Boolean, isItalic: Boolean) {
         senraisePrinterService?.setTextSize(textSize)
         senraisePrinterService?.setTextBold(isBold)
         senraisePrinterService?.printText(text)
     }
 
-    override fun printTable(texts: Array<String>, width: IntArray?, align: IntArray?) {
+    override fun printTable(
+        texts: Array<String>,
+        width: IntArray?,
+        align: IntArray?,
+        fontSize: Int
+    ) {
         senraisePrinterService?.printTableText(texts, width, align)
     }
 
@@ -78,13 +81,37 @@ class SenraisePrinterHelper : Printer {
         senraisePrinterService?.setAlignment(align)
     }
 
-    override fun getPrinterSize(): String {
-        return SIZE_58
+    override fun getPrinterSize(): PrinterSize {
+        return PrinterSize.SIZE_58
     }
 
-    override fun sendLcdDigital(text: String) {}
+    override fun escPosCommandExe(byteArray: ByteArray) {
+        senraisePrinterService?.printEpson(byteArray)
+    }
+
+    override fun getStatus(): PrinterStatus {
+        return PrinterStatus.NORMAL
+    }
+
+    override fun deInitPrinter(context: Context?) {
+        try {
+            SenraisePrinterManager.getInstance().unBindService(
+                context,
+                innerPrinterCallback
+            )
+        } catch (e: SenraisePrinterException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun release() {}
+
+    override fun cutPaper() {}
 
     override fun openDrawer() {}
-    override fun release() {}
+
+    override fun sendTextToLcdDigital(text: String) {}
+
+    override fun sendImageToLcdDigital(bitmap: Bitmap) {}
 
 }

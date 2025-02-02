@@ -1,7 +1,7 @@
 name: pos_printer
 description: "A new Flutter plugin project."
 version: 0.0.1
-homepage:
+# homepage:
 
 environment:
   sdk: ^3.6.0
@@ -36,7 +36,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.cashier.pos_printer.pos_printer
+        package: com.cashier.pos_printer
         pluginClass: PosPrinterPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

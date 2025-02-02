@@ -1,12 +1,11 @@
-package com.appy.cashier.common.printing.sunmi
+package com.cashier.pos_printer.printing.sunmi
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.RemoteException
-import com.appy.cashier.common.printing.Printer
-import com.appy.cashier.common.printing.Printer.Companion.SIZE_58
-import com.appy.cashier.common.printing.Printer.Companion.SIZE_80
-import com.cashier.pos_printer.printing.sunmi.ESCUtil
+import com.cashier.pos_printer.PrinterStatus
+import com.cashier.pos_printer.printing.Printer
+import com.cashier.pos_printer.printing.numnum.PrinterSize
 import com.sunmi.peripheral.printer.ExceptionConst
 import com.sunmi.peripheral.printer.InnerPrinterCallback
 import com.sunmi.peripheral.printer.InnerPrinterException
@@ -60,6 +59,7 @@ class SunmiPrintHelper : Printer {
         }
     }
 
+    override fun start() {}
 
     /**
      * init sunmi print service
@@ -79,19 +79,19 @@ class SunmiPrintHelper : Printer {
         }
     }
 
-    override fun start() {}
 
-    /**
-     * deInit sunmi print service
-     */
-    fun deInitSunmiPrinterService(context: Context?) {
+    override fun printTable(
+        texts: Array<String>,
+        width: IntArray?,
+        align: IntArray?,
+        fontSize: Int
+    ) {
+        if (sunmiPrinterService == null) {
+            return
+        }
         try {
-            if (sunmiPrinterService != null) {
-                InnerPrinterManager.getInstance().unBindService(context, innerPrinterCallback)
-                sunmiPrinterService = null
-                sunmiPrinter = LostSunmiPrinter
-            }
-        } catch (e: InnerPrinterException) {
+            sunmiPrinterService!!.printColumnsString(texts, width, align, null)
+        } catch (e: RemoteException) {
             e.printStackTrace()
         }
     }
@@ -188,22 +188,9 @@ class SunmiPrintHelper : Printer {
         }
     }
 
-    override fun printTable(texts: Array<String>, width: IntArray?, align: IntArray?) {
-        if (sunmiPrinterService == null) {
-            return
-        }
-        try {
-            sunmiPrinterService!!.printColumnsString(texts, width, align, null)
-        } catch (e: RemoteException) {
-            e.printStackTrace()
-        }
-    }
-
 
     override fun printText(
-        text: String,
-        textSize: Float,
-        isBold: Boolean
+        text: String, textSize: Float, isBold: Boolean, isItalic: Boolean
     ) {
         if (sunmiPrinterService == null) {
             return
@@ -213,6 +200,10 @@ class SunmiPrintHelper : Printer {
                 sunmiPrinterService!!.setPrinterStyle(
                     WoyouConsts.ENABLE_BOLD,
                     if (isBold) WoyouConsts.ENABLE else WoyouConsts.DISABLE
+                )
+                sunmiPrinterService!!.setPrinterStyle(
+                    WoyouConsts.ENABLE_ILALIC,
+                    if (isItalic) WoyouConsts.ENABLE else WoyouConsts.DISABLE
                 )
             } catch (e: RemoteException) {
                 if (isBold) {
@@ -240,23 +231,56 @@ class SunmiPrintHelper : Printer {
         }
     }
 
-    override fun getPrinterSize(): String {
+    override fun getPrinterSize(): PrinterSize {
         return if (sunmiPrinterService == null) {
-            SIZE_58
+            PrinterSize.SIZE_58
         } else try {
-            if (sunmiPrinterService!!.printerPaper == 1) SIZE_58 else SIZE_80
+            if (sunmiPrinterService!!.printerPaper == 1) PrinterSize.SIZE_58 else PrinterSize.SIZE_80
         } catch (e: RemoteException) {
             handleRemoteException(e)
-            SIZE_58
+            PrinterSize.SIZE_58
         }
     }
 
-    override fun sendLcdDigital(text: String) {
+    override fun cutPaper() {
+        if (sunmiPrinterService == null) {
+            return
+        }
+        try {
+            sunmiPrinterService!!.cutPaper(null)
+        } catch (e: RemoteException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun sendTextToLcdDigital(text: String) {
         if (sunmiPrinterService == null) {
             return
         }
         try {
             sunmiPrinterService!!.sendLCDDigital(text, null)
+        } catch (e: RemoteException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun sendImageToLcdDigital(bitmap: Bitmap) {
+        if (sunmiPrinterService == null) {
+            return
+        }
+        try {
+            sunmiPrinterService!!.sendLCDBitmap(bitmap, null)
+        } catch (e: RemoteException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun escPosCommandExe(byteArray: ByteArray) {
+        if (sunmiPrinterService == null) {
+            return
+        }
+        try {
+            sunmiPrinterService!!.sendRAWData(byteArray, null)
         } catch (e: RemoteException) {
             e.printStackTrace()
         }
@@ -273,6 +297,32 @@ class SunmiPrintHelper : Printer {
         }
     }
 
+    override fun getStatus(): PrinterStatus {
+        return when (sunmiPrinterService?.updatePrinterState()) {
+            1 -> PrinterStatus.NORMAL
+            4 -> PrinterStatus.OUT_OF_PAPER
+            5 -> PrinterStatus.OVER_HEATING
+            6 -> PrinterStatus.COVER_OPEN
+            else -> PrinterStatus.GENERAL_ERROR
+        }
+    }
+
     override fun release() {}
+
+    /**
+     * deInit sunmi print service
+     */
+    override fun deInitPrinter(context: Context?) {
+        try {
+            if (sunmiPrinterService != null) {
+                InnerPrinterManager.getInstance().unBindService(context, innerPrinterCallback)
+                sunmiPrinterService = null
+                sunmiPrinter = LostSunmiPrinter
+            }
+        } catch (e: InnerPrinterException) {
+            e.printStackTrace()
+        }
+    }
+
 
 }
