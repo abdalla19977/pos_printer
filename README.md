@@ -21,6 +21,12 @@ A Flutter package that provides a unified interface for thermal printer operatio
 - Senraise
 - Sunmi
 
+## Tested on
+
+- Telpo(M8)
+- Senraise(H10s)
+- Sunmi(V2,V3 Mix)
+
 ## Installation
 
 Add this to your package's `pubspec.yaml` file:
@@ -49,15 +55,15 @@ final printer = PosPrinter();
 ### Basic Printing
 
 ```dart
-// Start printing session (required for Telpo printers)
-printer.start();
-
 // Print text
 printer.printText("Hello World!", 27.0, true, false); // bold text
 printer.printText("Normal text", 27.0, false, false); // normal text
 
 // Feed paper
 printer.feedPaper(3);
+
+// Start printing session (required for Telpo printers)
+printer.start();
 
 // Release printer
 printer.release();
@@ -83,11 +89,13 @@ final Uint8List imageBytes = await loadImage();
 printer.printBitmap(imageBytes);
 ```
 
-### LCD Display (Sunmi D3 Mini)
+### LCD Display (Sunmi D3 Mini 58mm)
 
 ```dart
 // Display text on 7-segment display
 printer.sendTextToLcdDigital("12.50");
+
+### LCD Display (Sunmi D3 Mini 80/ Telpo M8)
 
 // Display image on LCD
 final Uint8List lcdImage = await loadLcdImage();
@@ -116,14 +124,6 @@ PrinterSize size = printer.getPrinterSize();
 DeviceManufacture manufacturer = printer.getDeviceManufacture();
 ```
 
-### Custom ESC/POS Commands
-
-```dart
-// Execute custom ESC/POS commands
-final Uint8List commands = Uint8List.fromList([27, 64]); // ESC @ (Initialize printer)
-printer.escPosCommandExe(commands);
-```
-
 ## Cleanup
 
 Make sure to properly release resources when done:
@@ -149,20 +149,6 @@ try {
   print('Printer error: $e');
 }
 ```
-
-## Device-Specific Considerations
-
-### Telpo
-- Requires `start()` before printing
-- Must call `release()` after printing
-
-### Sunmi
-- Supports LCD display features
-- Built-in paper cutting functionality
-
-### Senraise
-- Standard thermal printer functionality
-- Cash drawer support
 
 ## Contributing
 
