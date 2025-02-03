@@ -21,11 +21,14 @@ class _MyAppState extends State<MyApp> {
               title: const Text('Plugin example app'),
             ),
             body: Column(children: [
-              Text("${PosPrinterPlugin.getStatus}"),
               FilledButton(
                   onPressed: () {
                     PosPrinterPlugin.printText(
-                        "abdallaa\nabdallaa\nabdallaa\n", 30, true, true);
+                        "abdallaa\nabdallaa\nabdallaa\n\n\n\n\n\n",
+                        30,
+                        true,
+                        true);
+
                     PosPrinterPlugin.start();
                   },
                   child: Text("Click me"))

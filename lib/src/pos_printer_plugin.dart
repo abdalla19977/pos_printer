@@ -1,4 +1,3 @@
-
 import 'package:pos_printer/src/pos_printer.g.dart';
 
 class PosPrinterPlugin {
@@ -16,7 +15,7 @@ class PosPrinterPlugin {
   }
 
   static Future<PrinterStatus> get getStatus async {
-    return await _api.getPrinterStatus();
+    return _api.getPrinterStatus();
   }
 
   // static setAlign(Alignments alignment) async {

@@ -5,35 +5,13 @@ import android.graphics.Bitmap
 import com.cashier.pos_printer.PrinterStatus
 import com.cashier.pos_printer.printing.Printer
 import com.cashier.pos_printer.printing.numnum.PrinterSize
-import com.cashier.pos_printer.printing.senraise.service.SenraisePrinterCallback
-import com.cashier.pos_printer.printing.senraise.service.SenraisePrinterException
-import com.cashier.pos_printer.printing.senraise.service.SenraisePrinterManager
-import recieptservice.com.recieptservice.PrinterInterface
+import com.github.senraise_printer.SenraisePrinterHelper
+import com.github.senraise_printer.service.SenraisePrinterException
 
-/**
- * @Author: abdalla atheer
- * @Email: abdallahatheer.us@gmail.com
- * @Date: 8/9/2022
- */
 class SenraisePrinterHelper : Printer {
 
+    private val senraisePrinterService = SenraisePrinterHelper()
 
-    /**
-     * senraise means checking the printer connection status
-     * PrinterInterface for API
-     */
-    private var senraisePrinterService: PrinterInterface? = null
-
-
-    private val innerPrinterCallback: SenraisePrinterCallback = object : SenraisePrinterCallback() {
-        override fun onConnected(service: PrinterInterface) {
-            senraisePrinterService = service
-        }
-
-        override fun onDisconnected() {
-            senraisePrinterService = null
-        }
-    }
     override var leftAlignment: Int = 0
     override var centerAlignment: Int = 1
     override var rightAlignment: Int = 2
@@ -41,10 +19,7 @@ class SenraisePrinterHelper : Printer {
 
     override fun init(context: Context) {
         try {
-            SenraisePrinterManager.getInstance().bindService(
-                context,
-                innerPrinterCallback
-            )
+            senraisePrinterService.init(context)
         } catch (e: SenraisePrinterException) {
             e.printStackTrace()
         }
@@ -55,9 +30,7 @@ class SenraisePrinterHelper : Printer {
     }
 
     override fun printText(text: String, textSize: Float, isBold: Boolean, isItalic: Boolean) {
-        senraisePrinterService?.setTextSize(textSize)
-        senraisePrinterService?.setTextBold(isBold)
-        senraisePrinterService?.printText(text)
+        senraisePrinterService.printText(text,textSize,isBold)
     }
 
     override fun printTable(
@@ -66,19 +39,19 @@ class SenraisePrinterHelper : Printer {
         align: IntArray?,
         fontSize: Int
     ) {
-        senraisePrinterService?.printTableText(texts, width, align)
+        senraisePrinterService.printTable(texts, width, align)
     }
 
     override fun printBitmap(bitmap: Bitmap) {
-        senraisePrinterService?.printBitmap(bitmap)
+        senraisePrinterService.printBitmap(bitmap)
     }
 
     override fun feedPaper(lines: Int) {
-        senraisePrinterService?.nextLine(lines)
+        senraisePrinterService.feedPaper(lines)
     }
 
     override fun setAlign(align: Int) {
-        senraisePrinterService?.setAlignment(align)
+        senraisePrinterService.setAlign(align)
     }
 
     override fun getPrinterSize(): PrinterSize {
@@ -86,7 +59,7 @@ class SenraisePrinterHelper : Printer {
     }
 
     override fun escPosCommandExe(byteArray: ByteArray) {
-        senraisePrinterService?.printEpson(byteArray)
+        senraisePrinterService.printEpson(byteArray)
     }
 
     override fun getStatus(): PrinterStatus {
@@ -95,10 +68,9 @@ class SenraisePrinterHelper : Printer {
 
     override fun deInitPrinter(context: Context?) {
         try {
-            SenraisePrinterManager.getInstance().unBindService(
-                context,
-                innerPrinterCallback
-            )
+            if (context != null) {
+                senraisePrinterService.deInit(context)
+            }
         } catch (e: SenraisePrinterException) {
             e.printStackTrace()
         }

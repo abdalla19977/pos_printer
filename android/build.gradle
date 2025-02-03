@@ -52,11 +52,7 @@ android {
         testImplementation("org.mockito:mockito-core:5.0.0")
         implementation 'com.sunmi:printerlibrary:1.0.23'
         implementation 'com.github.abdalla19977:TelpoLib:1.4'
-
-    }
-
-    buildFeatures {
-        aidl true
+        implementation 'com.github.abdalla19977:SenraiseLib:1.2'
     }
 
     testOptions {
