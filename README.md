@@ -1,5 +1,7 @@
 # POS Printer Package
 
+[![pub package](https://img.shields.io/pub/v/pos_printer_helper.svg)](https://pub.dev/packages/pos_printer_helper)
+
 A Flutter package that provides a unified interface for thermal printer operations across multiple POS device manufacturers including Telpo, Senraise, and Sunmi.
 
 ## Features
