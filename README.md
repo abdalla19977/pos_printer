@@ -1,15 +1,173 @@
-# pos_printer
+# POS Printer Package
 
-A new Flutter plugin project.
+A Flutter package that provides a unified interface for thermal printer operations across multiple POS device manufacturers including Telpo, Senraise, and Sunmi.
+
+## Features
+
+- Compatibility with multiple POS device manufacturers
+- Text printing with customizable formatting (bold, italic, size)
+- Table printing with customizable column widths and alignments
+- Image printing support
+- LCD display support for compatible devices (e.g., Sunmi D3 Mini)
+- Cash drawer control
+- Paper cutting
+- ESC/POS command execution
+- Printer status monitoring
+- Automatic manufacturer detection
+
+## Supported Devices
+
+- Telpo
+- Senraise
+- Sunmi
+
+## Installation
+
+Add this to your package's `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  pos_printer: ^1.0.0
+```
 
 ## Getting Started
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+First, import the package:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```dart
+import 'package:pos_printer/pos_printer.dart';
+```
 
+Initialize the printer:
+
+```dart
+final printer = PosPrinter();
+```
+
+## Usage
+
+### Basic Printing
+
+```dart
+// Start printing session (required for Telpo printers)
+printer.start();
+
+// Print text
+printer.printText("Hello World!", 27.0, true, false); // bold text
+printer.printText("Normal text", 27.0, false, false); // normal text
+
+// Feed paper
+printer.feedPaper(3);
+
+// Release printer
+printer.release();
+```
+
+### Table Printing
+
+```dart
+// Print a table row
+printer.printTable(
+  ["Item", "Qty", "Price"],  // texts
+  [2, 1, 1],                 // column widths
+  [0, 1, 2],                 // alignments (0: left, 1: center, 2: right)
+  27                         // font size
+);
+```
+
+### Image Printing
+
+```dart
+// Print a bitmap image
+final Uint8List imageBytes = await loadImage();
+printer.printBitmap(imageBytes);
+```
+
+### LCD Display (Sunmi D3 Mini)
+
+```dart
+// Display text on 7-segment display
+printer.sendTextToLcdDigital("12.50");
+
+// Display image on LCD
+final Uint8List lcdImage = await loadLcdImage();
+printer.sendImageLcdDigital(lcdImage);
+```
+
+### Printer Control
+
+```dart
+// Set alignment
+printer.setAlign(Alignments.center);
+
+// Open cash drawer
+printer.openDrawer();
+
+// Cut paper
+printer.cutPaper();
+
+// Get printer status
+PrinterStatus status = printer.getPrinterStatus();
+
+// Get printer size
+PrinterSize size = printer.getPrinterSize();
+
+// Get device manufacturer
+DeviceManufacture manufacturer = printer.getDeviceManufacture();
+```
+
+### Custom ESC/POS Commands
+
+```dart
+// Execute custom ESC/POS commands
+final Uint8List commands = Uint8List.fromList([27, 64]); // ESC @ (Initialize printer)
+printer.escPosCommandExe(commands);
+```
+
+## Cleanup
+
+Make sure to properly release resources when done:
+
+```dart
+// Release printer after printing
+printer.release();
+
+// De-initialize printer when app is closing
+printer.deInitPrinter();
+```
+
+## Error Handling
+
+It's recommended to wrap printer operations in try-catch blocks:
+
+```dart
+try {
+  printer.start();
+  printer.printText("Test print", 27.0, false, false);
+  printer.release();
+} catch (e) {
+  print('Printer error: $e');
+}
+```
+
+## Device-Specific Considerations
+
+### Telpo
+- Requires `start()` before printing
+- Must call `release()` after printing
+
+### Sunmi
+- Supports LCD display features
+- Built-in paper cutting functionality
+
+### Senraise
+- Standard thermal printer functionality
+- Cash drawer support
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

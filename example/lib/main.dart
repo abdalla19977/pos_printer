@@ -13,6 +13,20 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  Future<PrinterStatus>? _printerStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _updatePrinterStatus();
+  }
+
+  void _updatePrinterStatus() {
+    setState(() {
+      _printerStatus = PosPrinterPlugin.getStatus();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,18 +34,32 @@ class _MyAppState extends State<MyApp> {
             appBar: AppBar(
               title: const Text('Printer example'),
             ),
-            body: Column(children: [
-              FilledButton(
-                  onPressed: () {
-                    PosPrinterPlugin.printText(
-                        "Hello World\nHello World\nHello World\n\n\n\n\n\n",
-                        30,
-                        true,
-                        true);
-
-                    PosPrinterPlugin.start();
-                  },
-                  child: Text("Click me"))
-            ])));
+            body: Center(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FutureBuilder<PrinterStatus>(
+                      future: _printerStatus,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+                        return Text('${snapshot.data}');
+                      },
+                    ),
+                    FilledButton(
+                        onPressed: () {
+                          PosPrinterPlugin.printText(
+                              "Hello World\nHello World\nHello World\n\n\n\n\n\n",
+                              30,
+                              true,
+                              true);
+                          PosPrinterPlugin.start();
+                          _updatePrinterStatus();
+                        },
+                        child: Text("Click me"))
+                  ]),
+            )));
   }
 }

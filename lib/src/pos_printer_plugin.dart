@@ -14,8 +14,8 @@ class PosPrinterPlugin {
     return;
   }
 
-  static Future<PrinterStatus> get getStatus async {
-    return _api.getPrinterStatus();
+  static Future<PrinterStatus> getStatus() async {
+    return await _api.getPrinterStatus();
   }
 
   // static setAlign(Alignments alignment) async {
