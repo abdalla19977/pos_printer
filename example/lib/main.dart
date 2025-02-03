@@ -18,13 +18,13 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
         home: Scaffold(
             appBar: AppBar(
-              title: const Text('Plugin example app'),
+              title: const Text('Printer example'),
             ),
             body: Column(children: [
               FilledButton(
                   onPressed: () {
                     PosPrinterPlugin.printText(
-                        "abdallaa\nabdallaa\nabdallaa\n\n\n\n\n\n",
+                        "Hello World\nHello World\nHello World\n\n\n\n\n\n",
                         30,
                         true,
                         true);
