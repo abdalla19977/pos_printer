@@ -136,20 +136,6 @@ printer.release();
 printer.deInitPrinter();
 ```
 
-## Error Handling
-
-It's recommended to wrap printer operations in try-catch blocks:
-
-```dart
-try {
-  printer.start();
-  printer.printText("Test print", 27.0, false, false);
-  printer.release();
-} catch (e) {
-  print('Printer error: $e');
-}
-```
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
