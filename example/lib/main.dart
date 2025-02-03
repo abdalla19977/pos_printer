@@ -23,12 +23,14 @@ class _MyAppState extends State<MyApp> {
 
   void _updatePrinterStatus() {
     setState(() {
-      _printerStatus = PosPrinterPlugin.getStatus();
+      _printerStatus = PosPrinterPlugin.getPrinterStatus();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final status = PosPrinterPlugin.getPrinterStatus();
+
     return MaterialApp(
         home: Scaffold(
             appBar: AppBar(
@@ -47,7 +49,7 @@ class _MyAppState extends State<MyApp> {
                         }
                         return Text('${snapshot.data}');
                       },
-                    ),
+                    ),Text("$status"),
                     FilledButton(
                         onPressed: () {
                           PosPrinterPlugin.printText(
