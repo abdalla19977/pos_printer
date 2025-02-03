@@ -2,7 +2,9 @@ name: pos_printer
 description: "A Flutter package that provides a unified interface for thermal printer operations across multiple POS device manufacturers."
 version: 1.0.0
 repository: 'https://github.com/abdalla19977/pos_printer'
-
+topics : 
+  - printing
+  - thermal
 
 environment:
   sdk: ^3.5.3
