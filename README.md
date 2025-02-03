@@ -8,7 +8,7 @@ A Flutter package that provides a unified interface for thermal printer operatio
 - Text printing with customizable formatting (bold, italic, size)
 - Table printing with customizable column widths and alignments
 - Image printing support
-- LCD display support for compatible devices (e.g., Sunmi D3 Mini)
+- LCD display support for compatible devices (e.g., Sunmi D3 Mini)(Coming Soon)
 - Cash drawer control
 - Paper cutting
 - ESC/POS command execution
