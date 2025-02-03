@@ -41,7 +41,6 @@ enum DeviceManufacture {
   unknown,
 }
 
-
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -49,16 +48,16 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is Alignments) {
+    } else if (value is Alignments) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is PrinterSize) {
+    } else if (value is PrinterSize) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    }    else if (value is PrinterStatus) {
+    } else if (value is PrinterStatus) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    }    else if (value is DeviceManufacture) {
+    } else if (value is DeviceManufacture) {
       buffer.putUint8(132);
       writeValue(buffer, value.index);
     } else {
@@ -69,16 +68,16 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 129: 
+      case 129:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : Alignments.values[value];
-      case 130: 
+      case 130:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : PrinterSize.values[value];
-      case 131: 
+      case 131:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : PrinterStatus.values[value];
-      case 132: 
+      case 132:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : DeviceManufacture.values[value];
       default:
@@ -91,9 +90,11 @@ class PosPrinter {
   /// Constructor for [PosPrinter].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  PosPrinter({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  PosPrinter(
+      {BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+        pigeonVar_messageChannelSuffix =
+            messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -104,8 +105,10 @@ class PosPrinter {
   /// used in case of printers only working with commit mode
   /// like telpo printers
   Future<void> start() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.start$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.start$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -130,15 +133,18 @@ class PosPrinter {
   /// [isBold] to set text to bold
   /// [isItalic] to set text to italic
   /// [textSize] 27f is preferred
-  Future<void> printText(String text, double textSize, bool isBold, bool isItalic) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.printText$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+  Future<void> printText(
+      String text, double textSize, bool isBold, bool isItalic) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.printText$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[text, textSize, isBold, isItalic]) as List<Object?>?;
+    final List<Object?>? pigeonVar_replyList = await pigeonVar_channel
+        .send(<Object?>[text, textSize, isBold, isItalic]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -157,15 +163,18 @@ class PosPrinter {
   /// [width] determine the width of text
   /// [align] determine the alignment of text in the row
   /// [fontSize] fontSize of the printed text
-  Future<void> printTable(List<String> texts, List<int> width, List<int> align, int fontSize) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.printTable$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+  Future<void> printTable(List<String> texts, List<int> width, List<int> align,
+      int fontSize) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.printTable$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[texts, width, align, fontSize]) as List<Object?>?;
+    final List<Object?>? pigeonVar_replyList = await pigeonVar_channel
+        .send(<Object?>[texts, width, align, fontSize]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -181,8 +190,10 @@ class PosPrinter {
 
   /// Print an image
   Future<void> printBitmap(Uint8List bitmap) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.printBitmap$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.printBitmap$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -205,8 +216,10 @@ class PosPrinter {
   /// Due to the distance between the paper hatch and the print head,
   /// the paper needs to be fed out manually
   Future<void> feedPaper(int lines) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.feedPaper$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.feedPaper$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -228,8 +241,10 @@ class PosPrinter {
 
   /// Set printer alignment
   Future<void> setAlign(Alignments align) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.setAlign$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.setAlign$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -251,8 +266,10 @@ class PosPrinter {
 
   /// Get printer head size 58mm or 80mm
   Future<PrinterSize> getPrinterSize() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.getPrinterSize$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.getPrinterSize$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -279,8 +296,10 @@ class PosPrinter {
 
   /// Send String to display on 7 segments display for sunmi d3 mini
   Future<void> sendTextToLcdDigital(String text) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.sendTextToLcdDigital$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.sendTextToLcdDigital$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -302,8 +321,10 @@ class PosPrinter {
 
   /// Send Image to display on LCD
   Future<void> sendImageLcdDigital(Uint8List bitmap) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.sendImageLcdDigital$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.sendImageLcdDigital$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -325,8 +346,10 @@ class PosPrinter {
 
   /// open cash drawer for supported device
   Future<void> openDrawer() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.openDrawer$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.openDrawer$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -348,8 +371,10 @@ class PosPrinter {
 
   ///cut the paper after printing
   Future<void> cutPaper() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.cutPaper$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.cutPaper$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -371,8 +396,10 @@ class PosPrinter {
 
   ///send esc/pos [commands] as bytes
   Future<void> escPosCommandExe(Uint8List commands) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.escPosCommandExe$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.escPosCommandExe$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -394,8 +421,10 @@ class PosPrinter {
 
   ///return the current status of the printer
   Future<PrinterStatus> getPrinterStatus() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.getPrinterStatus$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.getPrinterStatus$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -422,8 +451,10 @@ class PosPrinter {
 
   ///release printer after quitting app
   Future<void> deInitPrinter() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.deInitPrinter$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.deInitPrinter$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -446,8 +477,10 @@ class PosPrinter {
   /// return pos manufacture sunmi,senraise,telpo and
   /// unknown in case of unsupported brand
   Future<DeviceManufacture> getDeviceManufacture() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.getDeviceManufacture$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.getDeviceManufacture$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
@@ -475,8 +508,10 @@ class PosPrinter {
   /// release printer after printing complete
   /// works with telpo and pos that support commit mode
   Future<void> release() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.pos_printer.PosPrinter.release$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.pos_printer.PosPrinter.release$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,

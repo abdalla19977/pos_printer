@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pos_printer/pos_printer.dart';
+import 'package:pos_printer_helper/pos_printer_helper.dart';
 
 void main() {
   runApp(const MyApp());

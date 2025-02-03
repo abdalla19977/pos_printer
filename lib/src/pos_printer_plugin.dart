@@ -1,4 +1,4 @@
-import 'package:pos_printer/src/pos_printer.g.dart';
+import 'package:pos_printer_helper/src/pos_printer.g.dart';
 
 class PosPrinterPlugin {
   static final PosPrinter _api = PosPrinter();
