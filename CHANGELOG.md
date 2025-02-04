@@ -5,3 +5,7 @@
 ## 1.1.0
 
 *Added Missing features
+
+## 1.1.1
+
+*fixes
