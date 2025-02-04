@@ -35,7 +35,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  pos_printer: ^1.0.0
+  pos_printer: ^1.1.0
 ```
 
 ## Getting Started
@@ -46,36 +46,30 @@ First, import the package:
 import 'package:pos_printer/pos_printer.dart';
 ```
 
-Initialize the printer:
-
-```dart
-final printer = PosPrinter();
-```
-
 ## Usage
 
 ### Basic Printing
 
 ```dart
 // Print text
-printer.printText("Hello World!", 27.0, true, false); // bold text
-printer.printText("Normal text", 27.0, false, false); // normal text
+PosPrinterPlugin.printText("Hello World!", 27.0, true, false); // bold text
+PosPrinterPlugin.printText("Normal text", 27.0, false, false); // normal text
 
 // Feed paper
-printer.feedPaper(3);
+PosPrinterPlugin.feedPaper(3);
 
 // Start printing session (required for Telpo printers)
-printer.start();
+PosPrinterPlugin.start();
 
 // Release printer
-printer.release();
+PosPrinterPlugin.release();
 ```
 
 ### Table Printing
 
 ```dart
 // Print a table row
-printer.printTable(
+PosPrinterPlugin.printTable(
   ["Item", "Qty", "Price"],  // texts
   [2, 1, 1],                 // column widths
   [0, 1, 2],                 // alignments (0: left, 1: center, 2: right)
@@ -88,42 +82,42 @@ printer.printTable(
 ```dart
 // Print a bitmap image
 final Uint8List imageBytes = await loadImage();
-printer.printBitmap(imageBytes);
+PosPrinterPlugin.printBitmap(imageBytes);
 ```
 
 ### LCD Display (Sunmi D3 Mini 58mm)
 
 ```dart
 // Display text on 7-segment display
-printer.sendTextToLcdDigital("12.50");
+PosPrinterPlugin.sendTextToLcdDigital("12.50");
 
 ### LCD Display (Sunmi D3 Mini 80/ Telpo M8)
 
 // Display image on LCD
 final Uint8List lcdImage = await loadLcdImage();
-printer.sendImageLcdDigital(lcdImage);
+PosPrinterPlugin.sendImageLcdDigital(lcdImage);
 ```
 
 ### Printer Control
 
 ```dart
 // Set alignment
-printer.setAlign(Alignments.center);
+PosPrinterPlugin.setAlign(Alignments.center);
 
 // Open cash drawer
-printer.openDrawer();
+PosPrinterPlugin.openDrawer();
 
 // Cut paper
-printer.cutPaper();
+PosPrinterPlugin.cutPaper();
 
 // Get printer status
-PrinterStatus status = printer.getPrinterStatus();
+Future<PrinterStatus> status = PosPrinterPlugin.getPrinterStatus();
 
 // Get printer size
-PrinterSize size = printer.getPrinterSize();
+Future<PrinterSize> size = PosPrinterPlugin.getPrinterSize();
 
 // Get device manufacturer
-DeviceManufacture manufacturer = printer.getDeviceManufacture();
+Future<DeviceManufacture> manufacturer = PosPrinterPlugin.getDeviceManufacture();
 ```
 
 ## Cleanup
@@ -132,10 +126,10 @@ Make sure to properly release resources when done:
 
 ```dart
 // Release printer after printing
-printer.release();
+PosPrinterPlugin.release();
 
 // De-initialize printer when app is closing
-printer.deInitPrinter();
+PosPrinterPlugin.deInitPrinter();
 ```
 
 ## Contributing

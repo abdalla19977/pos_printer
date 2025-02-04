@@ -49,7 +49,8 @@ class _MyAppState extends State<MyApp> {
                         }
                         return Text('${snapshot.data}');
                       },
-                    ),Text("$status"),
+                    ),
+                    Text("$status"),
                     FilledButton(
                         onPressed: () {
                           PosPrinterPlugin.printText(
@@ -57,6 +58,7 @@ class _MyAppState extends State<MyApp> {
                               30,
                               true,
                               true);
+                          PosPrinterPlugin.cutPaper();
                           PosPrinterPlugin.start();
                           _updatePrinterStatus();
                         },
