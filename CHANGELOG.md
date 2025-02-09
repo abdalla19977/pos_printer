@@ -4,8 +4,11 @@
 
 ## 1.1.0
 
-*Added Missing features
+* Added Missing features
 
 ## 1.1.1
 
-*fixes
+* fixes
+
+## 1.1.2
+* fixed issue with gradle

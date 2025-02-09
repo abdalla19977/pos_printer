@@ -31,11 +31,8 @@ A Flutter package that provides a unified interface for thermal printer operatio
 
 ## Installation
 
-Add this to your package's `pubspec.yaml` file:
-
-```yaml
-dependencies:
-  pos_printer: ^1.1.0
+```dart
+flutter pub add pos_printer_helper
 ```
 
 ## Getting Started

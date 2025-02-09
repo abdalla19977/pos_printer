@@ -6,6 +6,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://jitpack.io" }
     }
 
     dependencies {
@@ -67,14 +68,3 @@ android {
         }
     }
 }
-
-//dependencies {
-////    implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
-////    implementation files("libs/telpoLib_v2.14.20231218.aar")
-//
-//    testImplementation("org.jetbrains.kotlin:kotlin-test")
-//    testImplementation("org.mockito:mockito-core:5.0.0")
-//    implementation 'com.sunmi:printerlibrary:1.0.23'
-//    implementation 'com.github.abdalla19977:TelpoLib:1.4'
-//
-//}
