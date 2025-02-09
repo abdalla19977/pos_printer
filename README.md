@@ -35,6 +35,18 @@ A Flutter package that provides a unified interface for thermal printer operatio
 flutter pub add pos_printer_helper
 ```
 
+``` gradle
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        
+        //add this line
+        maven { url "https://jitpack.io" }
+    }
+}
+```
+
 ## Getting Started
 
 First, import the package:
