@@ -1,6 +1,14 @@
 group = "com.cashier.pos_printer.pos_printer"
 version = "1.0-SNAPSHOT"
 
+[rootProject, this].each {
+    it.allprojects {
+        repositories {
+            maven { url 'https://jitpack.io' }
+        }
+    }
+}
+
 buildscript {
     ext.kotlin_version = "1.8.22"
     repositories {
@@ -19,6 +27,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://jitpack.io" }
     }
 }
 
