@@ -12,3 +12,6 @@
 
 ## 1.1.2
 * fixed issue with gradle
+
+## 1.1.3
+* fixed issue with gradle
